@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	"ailib",
+	"tictactoe",
+    "tictactoe-console"
+]
