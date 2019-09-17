@@ -103,3 +103,38 @@ impl <S: State> Strategy<S> for FullSearchStrategy {
 }
 
 */
+
+
+
+mod test {
+    #![allow(dead_code)]
+
+    struct StateHandle<'s, State> {
+        state: &'s mut State,
+    }
+
+    impl <'s, S> Drop for StateHandle<'s, S> {
+        fn drop(&mut self) {
+        }
+    }
+
+    struct Action;
+
+    impl Action {
+        fn act<'prev, 'pp>(&self, h: &'prev mut StateHandle<'pp, u32>) -> StateHandle<'prev, u32> {
+            *h.state += 1;
+            StateHandle { state: &mut *h.state }
+        }
+    }
+
+    fn test() {
+        let mut state = 0;
+        let action = Action;
+
+        let mut h0 = StateHandle { state: &mut state };
+        let mut h1 = action.act(&mut h0);
+        let h2 = action.act(&mut h1);
+        drop(h2);
+        *h1.state += 1
+    }
+}
