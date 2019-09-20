@@ -1,5 +1,6 @@
 use tictactoe::*;
-use ailib::{Strategy, RandomStrategy, DeterministicState};
+use ailib::{Strategy, DeterministicState};
+use ailib::strategies::RandomStrategy;
 
 fn main() {
     let mut state = TicTacToeState::initial();

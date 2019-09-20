@@ -3,6 +3,8 @@ use std::fmt;
 use std::iter::{once, Once};
 
 
+pub mod strategies;
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Winner<P: fmt::Display> {
     Player(P),
@@ -106,32 +108,7 @@ pub trait Strategy<State: crate::State> {
 
 
 
-pub struct RandomStrategy;
 
-impl RandomStrategy {
-    pub fn new() -> RandomStrategy {
-        RandomStrategy
-    }
-}
-
-impl Default for RandomStrategy {
-    fn default() -> RandomStrategy {
-        RandomStrategy::new()
-    }
-}
-
-impl <S: State> Strategy<S> for RandomStrategy {
-    type Rating = u32;
-
-    fn rated_actions(&self, state: &S) -> Vec<(S::Action, Self::Rating)> {
-        let mut rng = rand::thread_rng();
-        state
-            .possible_actions()
-            .into_iter()
-            .map(|action| (action, rng.gen::<u32>()))
-            .collect()
-    }
-}
 
 
 /*
