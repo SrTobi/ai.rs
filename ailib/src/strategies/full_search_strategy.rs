@@ -20,7 +20,12 @@ impl FullSearchStrategy {
         Default::default()
     }
 
-    fn rate_action<S: State>(&self, a: N64, b: N64, state: &mut S, action: &S::Action, player: S::Player) -> N64 {
+    fn rate_action<S: State>(
+        &self,
+        a: N64, b: N64,
+        state: &mut S, action: &S::Action,
+        player: S::Player) -> N64
+    {
         state
             .action_effects(action)
             .map(|effect| {
@@ -32,17 +37,21 @@ impl FullSearchStrategy {
             .sum()
     }
 
-    fn rate_state<S: State>(&self, mut a: N64, mut b: N64, state: &mut S, player: S::Player) -> N64 {
+    fn rate_state<S: State>(
+        &self,
+        mut a: N64, mut b: N64,
+        state: &mut S,
+        player: S::Player) -> N64
+    {
         if let Some(result) = state.winner() {
-            match result {
-                Winner::Draw => return self.draw_reward,
+            return match result {
+                Winner::Draw => self.draw_reward,
                 Winner::Player(winner) => {
-                    return
-                        if winner == player {
-                            self.win_reward
-                        } else {
-                            self.loose_reward
-                        }
+                    if winner == player {
+                        self.win_reward
+                    } else {
+                        self.loose_reward
+                    }
                 }
             }
         }
@@ -84,7 +93,12 @@ impl <S: State> Strategy<S> for FullSearchStrategy {
             .possible_actions()
             .into_iter()
             .map(|action| {
-                let rating = self.rate_action(-N64::infinity(), N64::infinity(), &mut mut_state, &action, state.player());
+                let rating = self.rate_action(
+                    -N64::infinity(), N64::infinity(),
+                    &mut mut_state,
+                    &action,
+                    state.player()
+                );
                 (action, rating)
             })
             .collect()
