@@ -1,5 +1,5 @@
 use tictactoe::*;
-use ailib::*;
+use ailib::{Strategy, RandomStrategy, DeterministicState};
 
 fn main() {
     let mut state = TicTacToeState::initial();
@@ -10,7 +10,7 @@ fn main() {
         let strat: &dyn Strategy<TicTacToeState, Rating = u32> = &RandomStrategy::new();
 
         match strat.best_action(&state) {
-            Some(action) => state.act(action),
+            Some(action) => state.apply_action(&action),
             None => {
                 println!("Winner: {}\n", state.winner().unwrap());
                 return;

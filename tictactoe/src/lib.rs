@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate enum_display_derive;
 
-use ailib::{Winner, State};
+use ailib::{Winner, DeterministicState};
 use std::fmt;
 use std::fmt::Display;
 
@@ -44,6 +44,7 @@ impl TicTacToeState {
     }
 }
 
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct TicTacToeAction {
     x: usize,
     y: usize,
@@ -55,7 +56,7 @@ impl TicTacToeAction {
     }
 }
 
-impl State for TicTacToeState {
+impl DeterministicState for TicTacToeState {
     type Action = TicTacToeAction;
     type Player = Stone;
 
@@ -92,7 +93,8 @@ impl State for TicTacToeState {
         }
     }
 
-    fn act(&mut self, TicTacToeAction {x, y} : Self::Action) {
+    fn apply_action(&mut self, TicTacToeAction {x, y} : &Self::Action) {
+        let (x, y) = (*x, *y);
         assert!(self.empty(x, y));
         assert!(self.winner().is_none());
         let player = self.player();
@@ -130,6 +132,14 @@ impl State for TicTacToeState {
             self.winner = Some(Winner::Draw)
         }
     }
+
+    fn unapply_action(&mut self, TicTacToeAction {x, y} : &Self::Action) {
+        let (x, y) = (*x, *y);
+        assert!(!self.empty(x, y));
+        self.fields[x][y] = None;
+        self.turn -= 1;
+        self.winner = None;
+    }
 }
 
 impl fmt::Display for TicTacToeState {
@@ -151,5 +161,11 @@ impl fmt::Display for TicTacToeState {
             f.write_str("\n")?;
         }
         Ok(())
+    }
+}
+
+impl fmt::Display for TicTacToeAction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "TicTacToeAction({}, {})", self.x, self.y)
     }
 }
