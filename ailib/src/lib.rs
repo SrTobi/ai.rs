@@ -2,10 +2,12 @@ use rand::Rng;
 use std::fmt;
 use std::iter::{once, Once};
 
+#[macro_use]
+extern crate derive_builder;
 
 pub mod strategies;
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum Winner<P: fmt::Display> {
     Player(P),
     Draw,
@@ -24,7 +26,7 @@ impl <P: fmt::Display> fmt::Display for Winner<P> {
 
 pub trait State: Clone {
     type Action: fmt::Display;
-    type Player: fmt::Display;
+    type Player: Eq + Copy + fmt::Display;
     type ActionEffect;
     type ActionEffectIterator: Iterator<Item = Self::ActionEffect>;
 
@@ -40,7 +42,7 @@ pub trait State: Clone {
 
 pub trait DeterministicState: Clone {
     type Action: fmt::Display;
-    type Player: fmt::Display;
+    type Player: Eq + Copy + fmt::Display;
 
     fn possible_actions(&self) -> Vec<Self::Action>;
 
@@ -108,35 +110,6 @@ pub trait Strategy<State: crate::State> {
 
 
 
-
-
-
-/*
-
-pub struct FullSearchStrategy;
-
-impl FullSearchStrategy {
-    pub fn new() -> FullSearchStrategy {
-        FullSearchStrategy
-    }
-}
-
-impl <S: State> Strategy<S> for FullSearchStrategy {
-    type Rating = bool;
-
-    fn rated_actions(&self, state: &S) -> Vec<(S::Action, Self::Rating)> {
-        let actions = state.possible_actions();
-        for action in actions {
-
-        }
-
-        unimplemented!();
-    }
-
-    fn find_best_action(&self, state: &S)
-}
-
-*/
 
 
 

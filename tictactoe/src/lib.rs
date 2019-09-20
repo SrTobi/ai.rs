@@ -5,13 +5,13 @@ use ailib::{Winner, DeterministicState};
 use std::fmt;
 use std::fmt::Display;
 
-#[derive(Copy, Clone, Eq, PartialEq, Display, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Display, Debug, Hash)]
 pub enum Stone {
     Circle,
     Cross
 }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct TicTacToeState {
     fields: [[Option<Stone>; 3]; 3],
     turn: u32,
