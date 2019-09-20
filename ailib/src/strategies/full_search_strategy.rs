@@ -1,3 +1,5 @@
+use core::cmp::min;
+use std::cmp::max;
 use crate::*;
 use noisy_float::prelude::*;
 
@@ -18,19 +20,19 @@ impl FullSearchStrategy {
         Default::default()
     }
 
-    fn rate_action<S: State>(&self, state: &mut S, action: &S::Action, player: S::Player) -> N64 {
+    fn rate_action<S: State>(&self, a: N64, b: N64, state: &mut S, action: &S::Action, player: S::Player) -> N64 {
         state
             .action_effects(action)
             .map(|effect| {
                 let possibility = n64(state.apply_effect(&effect));
-                let rating = self.rate_state(state, player);
+                let rating = self.rate_state(a, b, state, player);
                 state.unapply_effect(&effect);
                 possibility * rating
             })
             .sum()
     }
 
-    fn rate_state<S: State>(&self, state: &mut S, player: S::Player) -> N64 {
+    fn rate_state<S: State>(&self, mut a: N64, mut b: N64, state: &mut S, player: S::Player) -> N64 {
         if let Some(result) = state.winner() {
             match result {
                 Winner::Draw => return self.draw_reward,
@@ -56,15 +58,16 @@ impl FullSearchStrategy {
             };
         assert!(!actions.is_empty());
         for action in actions {
-            let rate = self.rate_action(state, &action, player);
-            let is_better =
-                if try_win {
-                    rate > best
-                } else {
-                    rate < best
-                };
-            if is_better {
-                best = rate;
+            let rate = self.rate_action(a, b, state, &action, player);
+            if try_win {
+                a = max(a, rate);
+                best = max(rate, best);
+            } else {
+                b = min(b, rate);
+                best = min(rate, best)
+            };
+            if a >= b {
+                break
             }
         }
         best
@@ -81,7 +84,7 @@ impl <S: State> Strategy<S> for FullSearchStrategy {
             .possible_actions()
             .into_iter()
             .map(|action| {
-                let rating = self.rate_action(&mut mut_state, &action, state.player());
+                let rating = self.rate_action(-N64::infinity(), N64::infinity(), &mut mut_state, &action, state.player());
                 (action, rating)
             })
             .collect()
